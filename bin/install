@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+install_yq() {
+  local install_type=$1
+  local version=$2
+  local install_path=$3
+  local platform="$(uname | tr '[:upper:]' '[:lower:]')-amd64"
+  local bin_install_path="$install_path/bin"
+  local binary_path="$bin_install_path/yq"
+  local download_url=$(get_download_url $version $platform)
+
+  echo "Creating bin directory"
+  mkdir -p "${bin_install_path}"
+
+  echo "Downloading yq from ${download_url} to ${binary_path}"
+  curl -L "${download_url}" -o "${binary_path}"
+  chmod +x "${binary_path}"
+}
+
+
+get_filename() {
+  local platform="$1"
+  echo "yq-${platform}"
+}
+
+get_download_url() {
+  local version="$1"
+  local platform="$2"
+  local filename="$(get_filename $platform)"
+  echo "https://github.com/mikefarah/yq/releases/download/v${version}/${filename}"
+}
+
+install_yq $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH

@@ -2,6 +2,7 @@
 
 set -e
 set -o pipefail
+set -x
 
 install_yq() {
   local install_type=$1
@@ -23,14 +24,14 @@ install_yq() {
 
 get_filename() {
   local platform="$1"
-  echo "yq-${platform}"
+  echo "yq_${platform}"
 }
 
 get_download_url() {
   local version="$1"
   local platform="$2"
   local filename="$(get_filename $platform)"
-  echo "https://github.com/mikefarah/yq/releases/download/v${version}/${filename}"
+  echo "https://github.com/mikefarah/yq/releases/download/${version}/${filename}"
 }
 
 install_yq $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH

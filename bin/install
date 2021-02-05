@@ -16,7 +16,7 @@ install_yq() {
   mkdir -p "${bin_install_path}"
 
   echo "Downloading yq from ${download_url} to ${binary_path}"
-  curl -L "${download_url}" -o "${binary_path}"
+  curl -fL "${download_url}" -o "${binary_path}"
   chmod +x "${binary_path}"
 }
 

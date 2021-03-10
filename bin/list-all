@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 release_path=https://api.github.com/repos/mikefarah/yq/releases
-cmd="curl -s"
-if [ -n "$GITHUB_API_TOKEN" ]; then
-  cmd="$cmd -H 'Authorization: token $GITHUB_API_TOKEN'"
+cmd='curl --fail --silent'
+if [ -n "${GITHUB_API_TOKEN:-}" ]; then
+  cmd="${cmd} -H 'Authorization: token ${GITHUB_API_TOKEN}'"
 fi
 cmd="$cmd $release_path"
 
@@ -12,5 +14,7 @@ function sort_versions() {
     LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
 }
 
-versions=$(eval $cmd | grep -oE "tag_name\": *\".{1,15}\"," | sed 's/tag_name\": *\"//;s/\",//' | sort_versions)
-echo $versions
+eval "${cmd} '${release_path}'" |
+  jq '.[] | select(.prerelease == false) | .tag_name | sub("v"; "")' -r |
+  tac |
+  xargs echo

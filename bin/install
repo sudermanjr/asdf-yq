@@ -10,7 +10,7 @@ install_yq() {
   local binary_path="$bin_install_path/yq"
   local download_url
 
-  platform="$(uname | tr '[:upper:]' '[:lower:]')_amd64"
+  platform="$(uname | tr '[:upper:]' '[:lower:]')_$(getArch)"
   download_url="$(get_download_url "${version}" "${platform}")"
   echo "Creating bin directory"
   mkdir -p "${bin_install_path}"
@@ -20,6 +20,18 @@ install_yq() {
   chmod +x "${binary_path}"
 }
 
+getArch() {
+  ARCH=$(uname -m)
+  case $ARCH in
+    armv*) ARCH="arm";;
+    aarch64) ARCH="arm64";;
+    x86) ARCH="386";;
+    x86_64) ARCH="amd64";;
+    i686) ARCH="386";;
+    i386) ARCH="386";;
+  esac
+  echo "$ARCH"
+}
 
 get_filename() {
   local platform="$1"

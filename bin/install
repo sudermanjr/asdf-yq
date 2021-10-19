@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 
-set -e
-set -o pipefail
+set -euo pipefail
 
 install_yq() {
-  local install_type=$1
-  local version=$2
-  local install_path=$3
-  local platform="$(uname | tr '[:upper:]' '[:lower:]')_amd64"
+  local version=$1
+  local install_path=$2
+  local platform
   local bin_install_path="$install_path/bin"
   local binary_path="$bin_install_path/yq"
-  local download_url=$(get_download_url $version $platform)
+  local download_url
 
+  platform="$(uname | tr '[:upper:]' '[:lower:]')_$(getArch)"
+  download_url="$(get_download_url "${version}" "${platform}")"
   echo "Creating bin directory"
   mkdir -p "${bin_install_path}"
 
@@ -20,6 +20,18 @@ install_yq() {
   chmod +x "${binary_path}"
 }
 
+getArch() {
+  ARCH=$(uname -m)
+  case $ARCH in
+    armv*) ARCH="arm";;
+    aarch64) ARCH="arm64";;
+    x86) ARCH="386";;
+    x86_64) ARCH="amd64";;
+    i686) ARCH="386";;
+    i386) ARCH="386";;
+  esac
+  echo "$ARCH"
+}
 
 get_filename() {
   local platform="$1"
@@ -29,8 +41,16 @@ get_filename() {
 get_download_url() {
   local version="$1"
   local platform="$2"
-  local filename="$(get_filename $platform)"
+  local filename
+  local major
+  local minor
+  filename="$(get_filename "${platform}")"
+  major="$(echo "${version}" | cut -f1 -d.)"
+  minor="$(echo "${version}" | cut -f2 -d.)"
+  if [[ "${major}" -gt 4 || ("${major}" -eq 4 && "${minor}" -gt 0) ]] ; then
+    version="v${version}"
+  fi
   echo "https://github.com/mikefarah/yq/releases/download/${version}/${filename}"
 }
 
-install_yq $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
+install_yq "${ASDF_INSTALL_VERSION}" "${ASDF_INSTALL_PATH}"

@@ -10,7 +10,7 @@ function sort_versions() {
 list_all_versions() {
   git ls-remote --tags --refs https://github.com/mikefarah/yq.git |
   sed -E -n 's,.*refs/tags/(.*),\1,p' |
-  sed -E -n 's,^v?([0-9](\.[0-9])*)$,\1,p'
+  sed -E -n 's,^v?([0-9]+(\.[0-9]+)*)$,\1,p'
 }
 
 list_all_versions | sort_versions | uniq | xargs echo

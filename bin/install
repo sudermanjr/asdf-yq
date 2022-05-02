@@ -44,12 +44,23 @@ get_download_url() {
   local filename
   local major
   local minor
-  filename="$(get_filename "${platform}")"
+  local patch
+
   major="$(echo "${version}" | cut -f1 -d.)"
   minor="$(echo "${version}" | cut -f2 -d.)"
+  patch="$(echo "${version}" | cut -f3 -d.)"
+
+  if [[ "${platform}" == "darwin_arm64" && ("${major}" -lt 4 || ("${major}" -eq 4 && "${minor}" -lt 9) || ("${major}" -eq 4 && "${minor}" -eq 9 && "${patch}" -lt 6)) ]] ; then
+    # arm64 builds are introduced from 4.9.6 onwards
+    platform="darwin_amd64"
+  fi
+
+  filename="$(get_filename "${platform}")"
+  
   if [[ "${major}" -gt 4 || ("${major}" -eq 4 && "${minor}" -gt 0) ]] ; then
     version="v${version}"
   fi
+
   echo "https://github.com/mikefarah/yq/releases/download/${version}/${filename}"
 }
 
